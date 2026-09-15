@@ -1,0 +1,21 @@
+services:
+  ocr:
+    build:
+      context: .
+      dockerfile: Dockerfile.mobile-ocr
+    image: mobile-ocr
+    # Drop the script entrypoint so the container lands in a shell.
+    entrypoint: ["/bin/bash"]
+    command: []
+    working_dir: /app
+    stdin_open: true
+    tty: true
+    volumes:
+      - .:/app
+      - ../images:/data
+      - ocr-models:/root/.paddlex
+    environment:
+      PYTHONUNBUFFERED: "1"
+
+volumes:
+  ocr-models:
