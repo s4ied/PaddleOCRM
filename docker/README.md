@@ -34,6 +34,10 @@ open a shell and iterate:
 docker compose -f docker-compose.mobile-ocr.yml run --rm ocr
 # inside the container
 python run_mobile_ocr.py /data/book.jpg -l de -o /data/out --save-images
+
+# Fine-tuned German recognition model (../train/versions is mounted at /models)
+python run_mobile_ocr.py /data/book.jpg -l de -o /data/out \
+    --rec-model-dir /models/latin_de_rec_model_1/latin_de_rec_infer
 ```
 
 This folder is bind mounted at `/app`, so edits to `run_mobile_ocr.py` on the
