@@ -1,0 +1,31 @@
+FROM ubuntu:24.04
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    VIRTUAL_ENV=/opt/venv \
+    PATH=/opt/venv/bin:$PATH
+
+# libgl1/libglib2.0-0 are required by opencv, libgomp1 by paddle.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        python3 \
+        python3-venv \
+        libgl1 \
+        libglib2.0-0 \
+        libgomp1 \
+        ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN python3 -m venv "$VIRTUAL_ENV"
+
+RUN pip install --upgrade pip \
+    && pip install paddlepaddle==3.2.0 -i https://www.paddlepaddle.org.cn/packages/stable/cpu/ \
+    && pip install paddleocr
+
+WORKDIR /app
+COPY run_mobile_ocr.py /app/
+
+# Model weights are downloaded here on first run; mount a volume to keep them.
+VOLUME ["/root/.paddlex"]
+
+ENTRYPOINT ["python", "/app/run_mobile_ocr.py"]
