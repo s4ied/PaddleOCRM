@@ -13,6 +13,7 @@ services:
     volumes:
       - .:/app
       - ../images:/data
+      - ../train/versions:/models:ro
       - ocr-models:/root/.paddlex
     environment:
       PYTHONUNBUFFERED: "1"

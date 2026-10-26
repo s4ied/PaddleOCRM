@@ -29,12 +29,15 @@ def build_ocr(
     device: str | None = None,
     enable_mkldnn: bool | None = None,
     cpu_threads: int = 2,
+    rec_model_dir: str | None = None,
 ) -> PaddleOCR:
     if enable_mkldnn is None:
         enable_mkldnn = default_enable_mkldnn()
     return PaddleOCR(
         text_detection_model_name=DET_MODEL,
         text_recognition_model_name=REC_MODELS[lang],
+        # Custom fine-tuned model; its inference.yml model_name must match the name above.
+        text_recognition_model_dir=rec_model_dir,
         # No rotation handling: skip doc orientation, unwarping and textline orientation.
         use_doc_orientation_classify=False,
         use_doc_unwarping=False,
@@ -71,12 +74,20 @@ def main() -> None:
         help="Force oneDNN on/off. Defaults to off on ARM, on elsewhere.",
     )
     parser.add_argument("--cpu-threads", type=int, default=2)
+    parser.add_argument(
+        "--rec-model-dir",
+        default=None,
+        help="Exported recognition inference dir (e.g. the fine-tuned model).",
+    )
     args = parser.parse_args()
 
     out_dir = Path(args.output)
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    ocr = build_ocr(args.lang, args.device, args.enable_mkldnn, args.cpu_threads)
+    ocr = build_ocr(
+        args.lang, args.device, args.enable_mkldnn, args.cpu_threads,
+        args.rec_model_dir,
+    )
 
     for result in ocr.predict_iter(args.input):
         texts = result["rec_texts"]
